@@ -94,6 +94,7 @@
 		</div>
 		<div id="tools">
 			<input type="button" id="tool-input" value="open project" onclick="openProject()">
+			<input type="button" id="tool-input" value="save project" onclick="saveProject()">
 			<input type="button" id="tool-input" value="add node" onclick="newBlankNode()">
 			<input type="button" id="tool-input" value="save node" onclick="saveAndReloadNode(this)">
 		</div>
@@ -166,6 +167,7 @@
 			}
 			projectWriter.createWritable().then(writable => {
 				writable.write(JSON.stringify(state)).then(() => {
+					console.log("Saved project: "+projectName);
 					writable.close();
 				});
 			});
@@ -175,6 +177,7 @@
 
 		const dragElement = (element, header) => {
 			let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+			const estate = state[element.id];
 
 			header.onmousedown = dragMouseDown;
 
@@ -198,14 +201,18 @@
 				pos4 = e.clientY;
 				element.style.top = (element.offsetTop - pos2) + "px";
 				element.style.left = (element.offsetLeft - pos1) + "px";
+				estate['x'] = element.style.top;
+				estate['y'] = element.style.left;
 			}
 
 			function closeDragElement() {
 				movementLock = false;
 				document.onmouseup = null;
 				document.onmousemove = null;
+				console.log("dragging finished");
 				projectWriter.createWritable().then(writable => {
 					writable.write(JSON.stringify(state)).then(() => {
+						console.log("Saved project: "+projectName);
 						writable.close();
 					});
 				});
@@ -300,7 +307,10 @@
 			const content = editor.editor.getModel().getValue();
 			saveLastNode(content, f);
 			let elm = lastEdited.querySelector('.content-iframe');
+			let head = lastEdited.querySelector('.draggable-header');
 			elm.contentWindow.location.reload();
+			head.innerHTML = elm.contentWindow.document.title;
+
 		}
 
 		function moveElementTo(element, x, y) {
@@ -324,6 +334,8 @@
 			document.body.appendChild(e);
 
 			moveElementTo(e, x, y);
+
+			eh.innerHTML = contentframe.contentWindow.document.title;
 			return e;
 		}
 
