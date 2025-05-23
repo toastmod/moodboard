@@ -107,6 +107,7 @@
 		var currentfp = null;
 		var projectWriter = null;
 		var projectName = null;
+		var movementLock = false;
 
 		function openProject() {
 			window.showOpenFilePicker({
@@ -178,6 +179,10 @@
 			header.onmousedown = dragMouseDown;
 
 			function dragMouseDown(e) {
+				if (movementLock) {
+					return;
+				}
+				movementLock = true;
 				e.preventDefault();
 				pos3 = e.clientX;
 				pos4 = e.clientY;
@@ -196,6 +201,7 @@
 			}
 
 			function closeDragElement() {
+				movementLock = false;
 				document.onmouseup = null;
 				document.onmousemove = null;
 				projectWriter.createWritable().then(writable => {
@@ -293,7 +299,8 @@
 		function saveAndReloadNode(f) {
 			const content = editor.editor.getModel().getValue();
 			saveLastNode(content, f);
-			thislastEdited.contentWindow.location.reload();
+			let elm = lastEdited.querySelector('.content-iframe');
+			elm.contentWindow.location.reload();
 		}
 
 		function moveElementTo(element, x, y) {
